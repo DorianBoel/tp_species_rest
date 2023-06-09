@@ -1,16 +1,19 @@
 package com.diginamic.species.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.diginamic.species.dto.AnimalDTO;
 import com.diginamic.species.entities.Animal;
+import com.diginamic.species.exception.EntityNotFoundException;
+import com.diginamic.species.exception.EntityUpdateDiffIdException;
+import com.diginamic.species.exception.EntityUpdateNoIdException;
+import com.diginamic.species.exception.NewEntityHasIdException;
 import com.diginamic.species.mappers.AnimalMapper;
 import com.diginamic.species.repositories.AnimalRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @Service
@@ -22,25 +25,37 @@ public class AnimalService {
     @Autowired
     private AnimalMapper animalMapper;
 
-    public List<AnimalDTO> findAll() {
-        return animalRepository.findAll().stream()
-            .map(animalMapper::toDTO)
-            .toList();
+    private AnimalDTO toDTO(Animal animal) {
+        return animalMapper.toDTO(animal);
+    }
+
+    public Page<AnimalDTO> findAll(Pageable pageable) {
+        return animalRepository.findAll(pageable)
+            .map(this::toDTO);
     }
 
     public AnimalDTO findById(Integer id) {
-        return animalMapper.toDTO(animalRepository.findById(id).orElseThrow(EntityNotFoundException::new));
+        Animal found = animalRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return toDTO(found);
     }
 
-    public Animal create(@Valid Animal newAnimal) {
-        return animalRepository.save(newAnimal);
+    public AnimalDTO create(@Valid Animal newAnimal) {
+        if (newAnimal.getId() != null)
+            throw new NewEntityHasIdException();
+        return toDTO(animalRepository.save(newAnimal));
     }
 
-    public Animal update(@Valid Animal updatedAnimal) {
-        return animalRepository.save(updatedAnimal);
+    public AnimalDTO update(Integer id, @Valid Animal updatedAnimal) {
+        if (updatedAnimal.getId() == null)
+            throw new EntityUpdateNoIdException();
+        if (!updatedAnimal.getId().equals(id))
+            throw new EntityUpdateDiffIdException();
+        return toDTO(animalRepository.save(updatedAnimal));
     }
 
     public void delete(Integer id) {
+        if (!animalRepository.existsById(id))
+            throw new EntityNotFoundException();
         animalRepository.deleteById(id);
     }
 
