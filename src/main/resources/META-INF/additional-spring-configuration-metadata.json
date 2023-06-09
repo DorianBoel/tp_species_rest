@@ -1,0 +1,9 @@
+{
+    "properties": [
+        {
+            "name": "cron.schedule",
+            "type": "java.lang.String",
+            "description": "Expression for cron execution schedule"
+        }
+    ]
+}

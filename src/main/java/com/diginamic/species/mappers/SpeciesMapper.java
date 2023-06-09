@@ -11,6 +11,8 @@ public class SpeciesMapper {
     public SpeciesDTO toDTO(Species species) {
         SpeciesDTO dto = new SpeciesDTO();
         dto.setId(species.getId());
+        dto.setCommonName(species.getCommonName());
+        dto.setLatinName(species.getLatinName());
         return dto;
     }
 

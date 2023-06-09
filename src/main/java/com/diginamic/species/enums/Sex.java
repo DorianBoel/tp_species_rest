@@ -3,6 +3,8 @@ package com.diginamic.species.enums;
 import java.util.Arrays;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import jakarta.persistence.AttributeConverter;
 import lombok.Getter;
 
@@ -12,6 +14,7 @@ public enum Sex {
     FEMALE("F"),
     MALE("M");
 
+    @JsonValue
     private String abbreviation;
 
     private Sex(String abbreviation) {
